@@ -44,15 +44,35 @@ export default async function handler(req, res) {
     
     console.log(`📨 Received ${events.length} events`);
     
-    // Rozpoznaj typ eventu po contract_identifier
+    // Rozpoznaj typ eventu - sprawdź różne miejsca w payloadzie
     let eventType = 'unknown';
-    if (events.length > 0 && events[0].contract_identifier) {
-      const contractId = events[0].contract_identifier;
+    
+    // Metoda 1: Sprawdź contract_identifier w eventach
+    if (events.length > 0) {
+      const event = events[0];
+      const contractId = event.contract_identifier || event.contractId || '';
+      
       if (contractId.includes('gm-unlimited')) {
         eventType = 'gm';
       } else if (contractId.includes('postMessage')) {
         eventType = 'post-message';
       }
+    }
+    
+    // Metoda 2: Sprawdź chainhook w payload (Hiro używa tego)
+    if (eventType === 'unknown' && payload.chainhook) {
+      const chainhookName = payload.chainhook.name || '';
+      if (chainhookName.includes('GM')) {
+        eventType = 'gm';
+      } else if (chainhookName.includes('Post Message')) {
+        eventType = 'post-message';
+      }
+    }
+    
+    // Metoda 3: Sprawdź apply[0].transaction_identifier
+    if (eventType === 'unknown' && events.length > 0) {
+      console.log('🔍 Checking transaction details:', events[0]);
+      // Loguj całą strukturę pierwszego eventu aby znaleźć contract_identifier
     }
     
     console.log(`🏷️ Event type: ${eventType}`);
