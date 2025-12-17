@@ -36,29 +36,37 @@ export default async function handler(req, res) {
     const network = new StacksMainnet();
     const senderAddress = 'SP000000000000000000002Q6VF78';
     
-    // Pobierz statystyki
-    const statsRes = await callReadOnlyFunction({
+    // Pobierz total GMs
+    const totalRes = await callReadOnlyFunction({
       contractAddress: GMOK_CONTRACT_ADDRESS,
       contractName: GMOK_CONTRACT_NAME,
-      functionName: 'get-stats',
+      functionName: 'get-total-gms-alltime',
       functionArgs: [],
       network,
       senderAddress,
     });
     
-    const stats = statsRes?.value?.data;
+    // Pobierz today's GMs
+    const todayRes = await callReadOnlyFunction({
+      contractAddress: GMOK_CONTRACT_ADDRESS,
+      contractName: GMOK_CONTRACT_NAME,
+      functionName: 'get-daily-gm-count',
+      functionArgs: [],
+      network,
+      senderAddress,
+    });
     
     // Parsuj dane
-    const totalGm = stats?.['total-gms']?.value 
-      ? (typeof stats['total-gms'].value === 'bigint' 
-          ? Number(stats['total-gms'].value) 
-          : Number(stats['total-gms'].value))
+    const totalGm = totalRes?.value?.value 
+      ? (typeof totalRes.value.value === 'bigint' 
+          ? Number(totalRes.value.value) 
+          : Number(totalRes.value.value))
       : 0;
       
-    const todayGm = stats?.['today-gms']?.value
-      ? (typeof stats['today-gms'].value === 'bigint'
-          ? Number(stats['today-gms'].value)
-          : Number(stats['today-gms'].value))
+    const todayGm = todayRes?.value?.value
+      ? (typeof todayRes.value.value === 'bigint'
+          ? Number(todayRes.value.value)
+          : Number(todayRes.value.value))
       : 0;
     
     // Zaktualizuj cache
