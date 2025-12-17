@@ -5,6 +5,12 @@ let gmCounter = {
   lastUpdate: Date.now()
 };
 
+let messageCounter = {
+  total: 0,
+  today: 0,
+  lastUpdate: Date.now()
+};
+
 export default async function handler(req, res) {
   // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -36,24 +42,56 @@ export default async function handler(req, res) {
     
     const events = payload.apply || [];
     
-    console.log(`📨 Received ${events.length} GM events`);
+    console.log(`📨 Received ${events.length} events`);
     
-    // Aktualizuj counter
-    gmCounter.total += events.length;
-    gmCounter.today += events.length;
-    gmCounter.lastUpdate = Date.now();
-    
-    for (const event of events) {
-      console.log('☀️ GM from:', event.sender);
-      console.log('   TX:', event.transaction_id);
+    // Rozpoznaj typ eventu po contract_identifier
+    let eventType = 'unknown';
+    if (events.length > 0 && events[0].contract_identifier) {
+      const contractId = events[0].contract_identifier;
+      if (contractId.includes('gm-unlimited')) {
+        eventType = 'gm';
+      } else if (contractId.includes('postMessage')) {
+        eventType = 'post-message';
+      }
     }
     
-    console.log(`📊 Counter updated: total=${gmCounter.total}, today=${gmCounter.today}`);
+    console.log(`🏷️ Event type: ${eventType}`);
+    
+    // Aktualizuj odpowiedni counter
+    if (eventType === 'gm') {
+      gmCounter.total += events.length;
+      gmCounter.today += events.length;
+      gmCounter.lastUpdate = Date.now();
+      
+      for (const event of events) {
+        console.log('☀️ GM from:', event.sender);
+        console.log('   TX:', event.transaction_id);
+      }
+      console.log(`📊 GM Counter updated: total=${gmCounter.total}, today=${gmCounter.today}`);
+    } else if (eventType === 'post-message') {
+      messageCounter.total += events.length;
+      messageCounter.today += events.length;
+      messageCounter.lastUpdate = Date.now();
+      
+      for (const event of events) {
+        console.log('📧 Message from:', event.sender);
+        console.log('   TX:', event.transaction_id);
+        // Spróbuj wyciągnąć treść wiadomości z eventu
+        if (event.data) {
+          console.log('   Content:', event.data);
+        }
+      }
+      console.log(`📊 Message Counter updated: total=${messageCounter.total}, today=${messageCounter.today}`);
+    }
     
     res.status(200).json({ 
       success: true, 
       processed: events.length,
-      counter: gmCounter
+      eventType: eventType,
+      counters: {
+        gm: gmCounter,
+        messages: messageCounter
+      }
     });
     
   } catch (error) {
@@ -62,5 +100,5 @@ export default async function handler(req, res) {
   }
 }
 
-// Export counter dla innych endpointów (jeśli potrzeba)
-export { gmCounter };
+// Export counters dla innych endpointów (jeśli potrzeba)
+export { gmCounter, messageCounter };
