@@ -23,10 +23,13 @@ export default async function handler(req, res) {
   }
   
   // Log everything first for debugging
-  console.log('🔔 Webhook called!');
+  console.log('🔔 ================================');
+  console.log('🔔 WEBHOOK CALLED!');
+  console.log('🔔 ================================');
   console.log('Method:', req.method);
   console.log('Headers:', JSON.stringify(req.headers, null, 2));
   console.log('Body:', JSON.stringify(req.body, null, 2));
+  console.log('🔔 ================================');
   
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Only POST allowed' });
