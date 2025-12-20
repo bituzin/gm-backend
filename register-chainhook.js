@@ -24,7 +24,7 @@ async function registerGMChainhook() {
         events: [{
           type: 'contract_call',
           contract_identifier: 'SP12XVTT769QRMK2TA2EETR5G57Q3W5A4HPA67S86.gm-unlimited',
-          methods: ['say-gm']  // Changed from 'method' to 'methods' array
+          method: 'say-gm'
         }]
       },
         action: {
