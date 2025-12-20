@@ -56,12 +56,22 @@ export default async function handler(req, res) {
       console.log('🔍 Event structure:', JSON.stringify(event, null, 2));
       
       // Sprawdź różne możliwe lokalizacje contract_identifier
-      const contractId = 
-        event.contract_identifier || 
-        event.contractId || 
-        event.transaction?.contract_call?.contract_id ||
-        event.contract_call?.contract_id ||
-        '';
+      let contractId = '';
+      
+      // Hiro format: event.transactions[0].metadata.kind.data.contract_identifier
+      if (event.transactions && event.transactions.length > 0) {
+        const tx = event.transactions[0];
+        contractId = tx.metadata?.kind?.data?.contract_identifier || '';
+      }
+      
+      // Fallback na inne formaty
+      if (!contractId) {
+        contractId = event.contract_identifier || 
+                     event.contractId || 
+                     event.transaction?.contract_call?.contract_id ||
+                     event.contract_call?.contract_id ||
+                     '';
+      }
       
       console.log('📝 Contract ID found:', contractId);
       
