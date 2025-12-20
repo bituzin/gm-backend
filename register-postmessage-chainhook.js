@@ -22,10 +22,10 @@ async function registerPostMessageChainhook() {
           methods: ['post-message']
         }]
       },
-      action: {
-        type: 'http_post',
-        url: 'https://gm-backend-seven.vercel.app/api/webhook'
-      }
+        action: {
+          type: 'http_post',
+          url: 'https://gm-backend-seven.vercel.app/api/webhook'
+        }
     });
     
     console.log('✅ Post Message Chainhook registered!');

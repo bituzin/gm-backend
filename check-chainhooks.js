@@ -35,14 +35,6 @@ async function checkChainhooks() {
       }
     }
     
-    // Try to get the specific chainhook
-    console.log('\n📋 Checking specific chainhook: 4b7a6436-a6d1-410e-9f74-dc70ea9a159d');
-    try {
-      const specific = await client.getChainhook('4b7a6436-a6d1-410e-9f74-dc70ea9a159d');
-      console.log('✅ Found:', JSON.stringify(specific, null, 2));
-    } catch (e) {
-      console.log('❌ Not found:', e.message);
-    }
     
   } catch (error) {
     console.error('❌ Error:', error.message);

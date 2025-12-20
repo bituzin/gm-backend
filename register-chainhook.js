@@ -27,10 +27,10 @@ async function registerGMChainhook() {
           methods: ['say-gm']  // Changed from 'method' to 'methods' array
         }]
       },
-      action: {
-        type: 'http_post',
-        url: 'https://gm-backend-nine.vercel.app/api/webhook'
-      }
+        action: {
+          type: 'http_post',
+          url: 'https://gm-backend-seven.vercel.app/api/webhook'
+        }
     });
     
     console.log('✅ Chainhook registered!');
