@@ -50,7 +50,17 @@ export default async function handler(req, res) {
     // Metoda 1: Sprawdź contract_identifier w eventach
     if (events.length > 0) {
       const event = events[0];
-      const contractId = event.contract_identifier || event.contractId || '';
+      console.log('🔍 Event structure:', JSON.stringify(event, null, 2));
+      
+      // Sprawdź różne możliwe lokalizacje contract_identifier
+      const contractId = 
+        event.contract_identifier || 
+        event.contractId || 
+        event.transaction?.contract_call?.contract_id ||
+        event.contract_call?.contract_id ||
+        '';
+      
+      console.log('📝 Contract ID found:', contractId);
       
       if (contractId.includes('gm-unlimited')) {
         eventType = 'gm';
@@ -62,6 +72,8 @@ export default async function handler(req, res) {
     // Metoda 2: Sprawdź chainhook w payload (Hiro używa tego)
     if (eventType === 'unknown' && payload.chainhook) {
       const chainhookName = payload.chainhook.name || '';
+      console.log('🔍 Chainhook name:', chainhookName);
+      
       if (chainhookName.includes('GM')) {
         eventType = 'gm';
       } else if (chainhookName.includes('Post Message')) {
@@ -69,10 +81,10 @@ export default async function handler(req, res) {
       }
     }
     
-    // Metoda 3: Sprawdź apply[0].transaction_identifier
-    if (eventType === 'unknown' && events.length > 0) {
-      console.log('🔍 Checking transaction details:', events[0]);
-      // Loguj całą strukturę pierwszego eventu aby znaleźć contract_identifier
+    // Metoda 3: Sprawdź rollback (jeśli istnieje)
+    if (eventType === 'unknown' && payload.rollback && payload.rollback.length > 0) {
+      console.log('🔄 Rollback detected, ignoring');
+      eventType = 'rollback';
     }
     
     console.log(`🏷️ Event type: ${eventType}`);
